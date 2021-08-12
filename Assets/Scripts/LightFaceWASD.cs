@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Assets
 {
     //let camera follow target
-    public class LightFollow : MonoBehaviour
+    public class LightFaceWASD : MonoBehaviour
     {
         public Transform target;
         public float lerpSpeed = 1.0f;
@@ -86,7 +86,6 @@ namespace Assets
             }
                         
             Vector3 euler = new Vector3(0, 0, alpha);
-            Debug.Log(transform.eulerAngles);
             Vector3 targete = euler;
             if (transform.eulerAngles.z > 180 && transform.eulerAngles.z - alpha > 180)
             {
@@ -97,8 +96,6 @@ namespace Assets
                 targete.z -= 360;
             }
             transform.eulerAngles = Vector3.Lerp(transform.eulerAngles, targete, lightLerp * Time.deltaTime);
-            //transform.eulerAngles = euler;
-            //transform.rotation = rot;
         }
 
     }
