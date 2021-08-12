@@ -4,94 +4,65 @@ using UnityEngine;
 
 namespace Assets {
     public class PlayerMove : MonoBehaviour {
-        public float acceleration;
-        public Rigidbody2D rigidbody;
-        public float friction;
-        private Vector3 dir;
-        private float angle;
-        private float angleX;
-        private float angleY;
-        private bool isAccX;
-        private bool isAccY;
-        private Vector3 mousePosXY;
-        private Vector3 lookTarget;
-        private float signedAcceleration;
+        public float acceleration = 1.0f;
+        public float turnRate = 1.0f;
+        public float friction = 0.1f;
+        public Rigidbody2D rbody;
+        private Vector2 properVelocity;
         private Vector2 momentum;
-        private Vector2 vel;
+        private float effectiveMass;
 
         public float mouseFollowLerp = 5.0f;
 
         private void Start() {
-            acceleration = 1.0f;
-            rigidbody = GetComponent<Rigidbody2D>();
-            friction = 0.1f;
+            rbody = GetComponent<Rigidbody2D>();
         }
 
         private void Update() {
-            mousePosXY = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            mousePosXY.z = 0;
-            dir = (mousePosXY - transform.position).normalized;
+            Relativity.SetTimeDistScales(rbody.velocity);
+            Relativity.SetRedshift(rbody.velocity);
+            UpdateMovement();
+            UpdateRotation();
+        }
 
-            angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg - 90;
-            lookTarget = new Vector3(0, 0, angle);
-
-            if (transform.eulerAngles.z > 180 && transform.eulerAngles.z - angle > 180)
-            {
-                lookTarget.z += 360;
-            }
-            else if (transform.eulerAngles.z < 180 && angle - transform.eulerAngles.z > 180)
-            {
-                lookTarget.z -= 360;
-            }
-
-            transform.eulerAngles = Vector3.Lerp(transform.eulerAngles, lookTarget, mouseFollowLerp);
-
-            isAccX = false;
-            isAccY = false;
+        private void UpdateMovement() {
+            float angle = 0;
             if (Input.GetKey(KeyCode.W)) {
-                angleY = (transform.eulerAngles.z+90) * Mathf.Deg2Rad;
-                isAccY = true;
-            }
-            else if (Input.GetKey(KeyCode.A)) {
-                angleX = (transform.eulerAngles.z+180) * Mathf.Deg2Rad;
-                isAccX = true;
-            }
-            else if (Input.GetKey(KeyCode.D)) {
-                angleX = (transform.eulerAngles.z) * Mathf.Deg2Rad;
-                isAccX = true;
+                angle = (transform.eulerAngles.z+90) * Mathf.Deg2Rad;
             }
             else if (Input.GetKey(KeyCode.S)) {
-                angleY = (transform.eulerAngles.z-90) * Mathf.Deg2Rad;
-                isAccY = true;
+                angle = (transform.eulerAngles.z-90) * Mathf.Deg2Rad;
             }
 
-            if (isAccX && isAccY) {
-                if (angleX - angleY > 180)
-                {
-                    angleY += 360;
-                }
-                else if (angleY - angleX > 180)
-                {
-                    angleX += 360;
-                }
+            momentum = Relativity.MomentumFromVelocity(rbody.mass, rbody.velocity);
 
-                angle = (angleX + angleY) / 2;
-            }
-            else if (isAccX) {
-                angle = angleX;
-            }
-            else if (isAccY) {
-                angle = angleY;
+            if (angle != 0 && rbody.velocity.magnitude < Relativity.speedOfLight) {
+                Vector2 acc;
+                acc.x = Mathf.Cos(angle);
+                acc.y = Mathf.Sin(angle);
+                acc *= acceleration;
+                momentum += acc*Time.deltaTime;
             }
 
-            if (isAccX || isAccY) {
-                vel.x = Mathf.Cos(angle);
-                vel.y = Mathf.Sin(angle);
-                vel *= acceleration;
-                Debug.Log(angle);
-                Debug.Log(vel);
-                rigidbody.AddForce(vel);
+            momentum *= (1 - friction*Time.deltaTime);
+            rbody.velocity = Relativity.VelocityFromMomentum(rbody.mass, momentum);
+            Debug.Log(Relativity.gamma);
+        }
+
+        private void UpdateRotation() {
+            // not relativistic. (yet...?)
+
+            float angle = 0;
+            if (Input.GetKey(KeyCode.A)) {
+                angle = turnRate;
             }
+            else if (Input.GetKey(KeyCode.D)) {
+                angle = -turnRate;
+            }
+
+            Vector3 torque = new Vector3(0, 0, angle);
+            
+            rbody.AddTorque(angle);
         }
     }
 }
