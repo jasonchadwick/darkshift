@@ -46,7 +46,6 @@ namespace Assets {
 
             momentum *= (1 - friction*Time.deltaTime);
             rbody.velocity = Relativity.VelocityFromMomentum(rbody.mass, momentum);
-            Debug.Log(Relativity.gamma);
         }
 
         private void UpdateRotation() {

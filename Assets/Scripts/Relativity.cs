@@ -8,13 +8,24 @@ namespace Assets {
         public static float XScale = 1.0f;
         public static float YScale = 1.0f;
         public static float gamma = 1.0f;
+        public static float scale = 1.0f;
+        public static Vector2 scaleDir = new Vector2(1, 0);
 
         public static void SetTimeDistScales(Vector2 velocity) {
-            gamma = 1.0f / Mathf.Sqrt(1.0f - Mathf.Pow(velocity.magnitude / Relativity.speedOfLight, 2));
-            XScale =  Mathf.Sqrt(1.0f - Mathf.Pow(velocity.x / Relativity.speedOfLight, 2));
-            YScale =  Mathf.Sqrt(1.0f - Mathf.Pow(velocity.y / Relativity.speedOfLight, 2));
-            Time.timeScale = 1.0f;
-            //Time.fixedDeltaTime = 1.0f;
+            if (velocity.x == 0 && velocity.y == 0) {
+                gamma = 1.0f;
+                XScale = 1.0f;
+                YScale = 1.0f;
+                Time.timeScale = 1.0f;
+            }
+            else {
+                gamma = 1.0f / Mathf.Sqrt(1.0f - Mathf.Pow(velocity.magnitude / Relativity.speedOfLight, 2));
+                scaleDir = velocity.normalized;
+                scale = 1 / gamma;
+                Time.timeScale = 1.0f;
+                Debug.Log(scale);
+                //Time.fixedDeltaTime = 1.0f;
+            }
         }
 
         public static void SetRedshift(Vector2 velocity) {
