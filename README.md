@@ -1,3 +1,5 @@
+# NO LONGER BEING WORKED ON (jasonchadwick/chronodrifter is more interesting)
+
 # Darkshift: a relativistic puzzle game
 
 It's a bit weird because we observe the player from above, but the effects are what
